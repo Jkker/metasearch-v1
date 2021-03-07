@@ -1,28 +1,33 @@
 import { Button, Input, Tabs } from 'antd';
 import 'antd/dist/antd.css';
 import React, { useEffect, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import './App.css';
 import { frames, links } from './config.js';
 
 const { TabPane } = Tabs;
 const { Search } = Input;
 
+function useQuery() {
+	return new URLSearchParams(useLocation().search);
+}
+
 function App() {
 	// Get user ip & location
 	useEffect(() => {}, []);
-
-	const [query, setQuery] = useState('');
+	const history = useHistory();
+	const [keyword, setKeyword] = useState(useQuery()?.get('q') ?? '');
 	const handleChange = (e: any) => {
-		// console.log(e.target.value);
-		setQuery(e.target.value);
-		console.log(query);
+		setKeyword(e.target.value);
+		history.push(`/?q=${e.target.value}`);
 	};
 	return (
 		<div className='app-container'>
 			<div className='head-container'>
 				<Search
-					placeholder='那人却在，灯火阑珊处'
-					onSearch={setQuery}
+					placeholder='蓦然回首，那人却在，灯火阑珊处'
+					value={keyword}
+					onSearch={setKeyword}
 					onChange={handleChange}
 					size='large'
 					allowClear
@@ -30,7 +35,7 @@ function App() {
 			</div>
 			<div className='body-container'>
 				<Tabs
-					tabBarExtraContent={links(encodeURIComponent(query)).map(({ link, title }) => (
+					tabBarExtraContent={links(encodeURIComponent(keyword)).map(({ link, title }) => (
 						<Button key={title}>
 							<a
 								title={title}
@@ -45,7 +50,7 @@ function App() {
 						</Button>
 					))}
 				>
-					{frames(encodeURIComponent(query)).map(({ title, link }) => (
+					{frames(encodeURIComponent(keyword)).map(({ title, link }) => (
 						<TabPane key={link} tab={title} className='tabpane'>
 							<iframe
 								title={title}
