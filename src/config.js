@@ -41,22 +41,25 @@ export const links = (keyword) => [
 	// },
 ];
 
-export const frames = (keyword, jsproxy = false) => [
-	{
-		title: 'Bing',
-		link: `https://www.bing.com/search?q=${keyword}`,
-	},
+export const frames = (keyword, proxy = false) => [
 	{
 		title: 'Google',
-		link: jsproxy
-			? `https://jsproxy.jerrykjia.workers.dev/-----https://www.google.com/search?igu=1&ei=&pws=0&gl=us&gws_rd=cr&safe=off&source=hp&q=${keyword}&oq=${keyword}`
-			: `https://www.google.com/search?igu=1&ei=&pws=0&gl=us&gws_rd=cr&source=hp&q=${keyword}&oq=${keyword}`,
+		link: proxy
+			? `https://www.google.com/search?igu=1&pws=0&gl=us&gws_rd=cr&source=hp&q=${keyword}&oq=${keyword}`
+			: `https://jsproxy.jerrykjia.workers.dev/-----https://www.google.com/search?igu=1&pws=0&gl=us&gws_rd=cr&source=hp&q=${keyword}&oq=${keyword}`,
+		priority: 10 + (proxy ? 1 : -1),
 	},
 	{
 		title: '百度',
 		link: `https://www.baidu.com/s?ie=utf-8&word=${keyword}`,
+		priority: 10 + (proxy ? -1 : 1),
 	},
-
+	{
+		title: 'Bing',
+		link: proxy
+			? `https://cn.bing.com/search?q=${keyword}&ensearch=1`
+			: `https://www.bing.com/search?q=${keyword}`,
+	},
 	// {
 	// 	title: '搜狗',
 	// 	link: `https://www.sogou.com/web?query=${keyword}`,
@@ -97,10 +100,10 @@ export const frames = (keyword, jsproxy = false) => [
 		title: '语雀',
 		link: `https://www.yuque.com/search?&q=${keyword}`,
 	},
-	{
-		title: 'Doge',
-		link: `https://www.dogedoge.com/results?q=${keyword}`,
-	},
+	// {
+	// 	title: 'Doge',
+	// 	link: `https://www.dogedoge.com/results?q=${keyword}`,
+	// },
 	{
 		title: '百度指数',
 		link: `https://index.baidu.com/v2/main/index.html#/trend/${keyword}?words=${keyword}`,
