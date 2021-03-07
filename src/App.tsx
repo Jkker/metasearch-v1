@@ -47,6 +47,12 @@ function App() {
 		history.push(`/`);
 		indexSearchBarRef?.current?.focus?.();
 	};
+
+	const handleSearch = (key: React.SetStateAction<string>) => {
+		setKeyword(key);
+		history.push(`/?q=${key}`);
+		indexSearchBarRef?.current?.focus?.();
+	};
 	return (
 		<>
 			{keyword ? (
@@ -56,7 +62,7 @@ function App() {
 						<Input.Search
 							placeholder='蓦然回首，那人却在，灯火阑珊处'
 							value={keyword}
-							onSearch={setKeyword}
+							onSearch={handleSearch}
 							onChange={handleChange}
 							size='large'
 							allowClear
@@ -118,7 +124,7 @@ function App() {
 						<Input.Search
 							placeholder='蓦然回首，那人却在，灯火阑珊处'
 							// value={keyword}
-							onSearch={setKeyword}
+							onSearch={handleSearch}
 							// onChange={handleChange}
 							size='large'
 							allowClear

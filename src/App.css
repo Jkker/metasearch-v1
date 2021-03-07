@@ -67,7 +67,7 @@ body {
 }
 .search-bar {
 	width: 546px;
-	opacity: 85%;
+	/* opacity: 85%; */
 	/* backdrop-filter: blur(20px); */
 	margin-bottom: 40px;
 }
