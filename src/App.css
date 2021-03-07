@@ -9,10 +9,16 @@ body {
 	min-width: 100vw;
 }
 .head-container {
-	background: #eee;
+	background: #fff;
+	display: flex;
+	justify-content: space-between;
 	text-align: center;
 	flex-shrink: 0;
 	width: 100vw;
+}
+.logo-left {
+	height: 34px;
+	margin: 3px 10px;
 }
 .ant-tabs-nav {
 	margin: 0 10px !important;
@@ -24,4 +30,44 @@ body {
 	flex-grow: 1;
 	display: flex;
 	align-items: stretch;
+}
+
+.index-page {
+	background-position: center;
+	width: 100%;
+	height: 100%;
+	background-size: cover;
+	position: absolute;
+	display: flex;
+	flex-flow: column;
+	justify-content: center;
+	align-items: center;
+	/* backdrop-filter: blur(10px); */
+}
+.index-head {
+	width: 546px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin-bottom: 20px;
+}
+
+.logo-center {
+	width: 100px;
+}
+.index-title {
+	text-align: center;
+	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+	font-size: 50px;
+	font-weight: bold;
+	/* color: #463e56; */
+	color: white;
+	/* opacity: 0.8; */
+	align-self: center;
+}
+.search-bar {
+	width: 546px;
+	opacity: 85%;
+	/* backdrop-filter: blur(20px); */
+	margin-bottom: 40px;
 }
