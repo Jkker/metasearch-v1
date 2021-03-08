@@ -130,8 +130,7 @@ function App() {
 				<div
 					className='index-page'
 					style={{
-						backgroundImage:
-							'url(https://cdnb.artstation.com/p/assets/images/images/009/312/021/large/alena-aenami-aenami-lunar.jpg?1518269866)',
+						backgroundImage: 'url(https://i.loli.net/2021/03/09/86O5gQlxUputVS2.jpg)',
 					}}
 				>
 					<div className='index-head' onClick={handleReset}>
