@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Button, Input, Tabs } from 'antd';
 import 'antd/dist/antd.css';
 import { debounce } from 'lodash';
@@ -7,19 +8,25 @@ import request from 'umi-request';
 import './App.css';
 import { frames, links } from './config.js';
 
-function useQuery() {
-	return new URLSearchParams(useLocation().search)?.get('q') ?? '';
+function useQuery(query: string) {
+	return new URLSearchParams(useLocation().search)?.get(query) ?? '';
 }
 
 function App() {
-	const [inputKey, setInputKey] = useState(useQuery());
-	const [searchKey, setSearchKey] = useState(useQuery());
+	const [inputKey, setInputKey] = useState(useQuery('q'));
+	const [searchKey, setSearchKey] = useState(useQuery('q'));
 
 	// Active key of tabs
-	const [activeKey, setActiveKey] = useState(frames('', false)[0].title);
+	const [activeKey, setActiveKey] = useState(useQuery('engine') ?? '');
+	const [defaultActiveKey, setDefaultActiveKey] = useState(frames('', false)[0].title);
 	const handleTabClick = (key: React.SetStateAction<string>, e: any) => {
 		setActiveKey(key);
 	};
+	useEffect(() => {
+		history.push(
+			`/?${activeKey ? `engine=${activeKey}&` : ''}${searchKey ? `q=${searchKey}` : ''}`
+		);
+	}, [activeKey]);
 
 	// Detect if user has proxy
 	const [hasProxy, setHasProxy] = useState(false);
@@ -28,20 +35,19 @@ function App() {
 			const req = await request.get('http://ip-api.com/json/');
 			const userHasProxy = req.countryCode === 'CN' ? false : true;
 			setHasProxy(userHasProxy);
-			setActiveKey(
-				userHasProxy ? frames('', userHasProxy)[0].title : frames('', userHasProxy)[1].title
-			);
+			const key = userHasProxy
+				? frames('', userHasProxy)[0].title
+				: frames('', userHasProxy)[1].title;
+			setDefaultActiveKey(key);
 		})();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	//* Core search functionality
 	const history = useHistory();
 	const handleSearch = (key: string) => {
 		setSearchKey(key);
-		history.push(`/?q=${key}`);
+		history.push(`/?${activeKey ? `engine=${activeKey}&` : ''}${key ? `q=${key}` : ''}`);
 	};
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	const debounceSearch = useCallback(debounce(handleSearch, 500), []);
 	const handleInputChange = (e: any) => {
 		debounceSearch(e.target.value);
@@ -50,6 +56,7 @@ function App() {
 	const handleReset = () => {
 		debounceSearch('');
 		setInputKey('');
+		setActiveKey('');
 	};
 
 	// Auto focus search bar after refresh
@@ -83,8 +90,7 @@ function App() {
 					</div>
 					<div className='body-container'>
 						<Tabs
-							activeKey={activeKey}
-							defaultActiveKey={frames('', hasProxy)[0].title}
+							activeKey={activeKey ? activeKey : defaultActiveKey}
 							onTabClick={handleTabClick}
 							tabBarExtraContent={links(encodeURIComponent(searchKey)).map(({ link, title }) => (
 								<Button key={title}>
@@ -128,7 +134,7 @@ function App() {
 							'url(https://cdnb.artstation.com/p/assets/images/images/009/312/021/large/alena-aenami-aenami-lunar.jpg?1518269866)',
 					}}
 				>
-					<div className='index-head'>
+					<div className='index-head' onClick={handleReset}>
 						{/* <img className='logo-center' src='favicon.png' alt='' /> */}
 						<span className='index-title'>🚀 Meta Search</span>
 					</div>

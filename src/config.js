@@ -44,9 +44,7 @@ export const links = (keyword) => [
 export const frames = (keyword, proxy = false) => [
 	{
 		title: 'Google',
-		link: proxy
-			? `https://www.google.com/search?igu=1&pws=0&gl=us&gws_rd=cr&source=hp&q=${keyword}&oq=${keyword}`
-			: `https://jsproxy.jerrykjia.workers.dev/-----https://www.google.com/search?igu=1&pws=0&gl=us&gws_rd=cr&source=hp&q=${keyword}&oq=${keyword}`,
+		link: `https://www.google.com/search?igu=1&pws=0&gl=us&gws_rd=cr&source=hp&q=${keyword}&oq=${keyword}`,
 		priority: 10 + (proxy ? 1 : -1),
 	},
 	{
@@ -56,9 +54,7 @@ export const frames = (keyword, proxy = false) => [
 	},
 	{
 		title: 'Bing',
-		link: proxy
-			? `https://cn.bing.com/search?q=${keyword}&ensearch=1`
-			: `https://www.bing.com/search?q=${keyword}`,
+		link: `https://www.bing.com/search?q=${keyword}`,
 	},
 	// {
 	// 	title: '搜狗',
