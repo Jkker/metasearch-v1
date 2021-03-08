@@ -1,23 +1,26 @@
 import { Button, Input, Tabs } from 'antd';
 import 'antd/dist/antd.css';
-import React, { useEffect, useRef, useState } from 'react';
+import { debounce } from 'lodash';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import request from 'umi-request';
 import './App.css';
 import { frames, links } from './config.js';
 
 function useQuery() {
-	return new URLSearchParams(useLocation().search);
+	return new URLSearchParams(useLocation().search)?.get('q') ?? '';
 }
 
 function App() {
+	const [inputKey, setInputKey] = useState(useQuery());
+	const [searchKey, setSearchKey] = useState(useQuery());
+
 	// Active key of tabs
 	const [activeKey, setActiveKey] = useState(frames('', false)[0].title);
 	const handleTabClick = (key: React.SetStateAction<string>, e: any) => {
 		setActiveKey(key);
 	};
-	const indexSearchBarRef = useRef<any>(null);
-	const landingSearchBarRef = useRef<any>(null);
+
 	// Detect if user has proxy
 	const [hasProxy, setHasProxy] = useState(false);
 	useEffect(() => {
@@ -29,41 +32,48 @@ function App() {
 				userHasProxy ? frames('', userHasProxy)[0].title : frames('', userHasProxy)[1].title
 			);
 		})();
-		indexSearchBarRef?.current?.focus?.();
-		landingSearchBarRef?.current?.focus?.();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
-	// Query string functionality
+	//* Core search functionality
 	const history = useHistory();
-	const [keyword, setKeyword] = useState(useQuery()?.get('q') ?? '');
-	const handleChange = (e: any) => {
-		setKeyword(e.target.value);
-		history.push(`/?q=${e.target.value}`);
-		indexSearchBarRef?.current?.focus?.();
-	};
-
-	const handleReset = () => {
-		setKeyword('');
-		history.push(`/`);
-		indexSearchBarRef?.current?.focus?.();
-	};
-
-	const handleSearch = (key: React.SetStateAction<string>) => {
-		setKeyword(key);
+	const handleSearch = (key: string) => {
+		setSearchKey(key);
 		history.push(`/?q=${key}`);
-		indexSearchBarRef?.current?.focus?.();
 	};
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	const debounceSearch = useCallback(debounce(handleSearch, 500), []);
+	const handleInputChange = (e: any) => {
+		debounceSearch(e.target.value);
+		setInputKey(e.target.value);
+	};
+	const handleReset = () => {
+		debounceSearch('');
+		setInputKey('');
+	};
+
+	// Auto focus search bar after refresh
+	const indexSearchBarRef = useRef<any>(null);
+	const landingSearchBarRef = useRef<any>(null);
+	useEffect(() => {
+		if (searchKey) {
+			landingSearchBarRef?.current?.focus?.();
+		} else {
+			indexSearchBarRef?.current?.focus?.();
+		}
+	}, [searchKey]);
+
 	return (
 		<>
-			{keyword ? (
+			{searchKey ? (
 				<div className='app-container'>
 					<div className='head-container'>
 						<img className='logo-left' src='favicon.png' alt='' onClick={handleReset} />
 						<Input.Search
 							placeholder='蓦然回首，那人却在，灯火阑珊处'
-							value={keyword}
+							value={inputKey}
 							onSearch={handleSearch}
-							onChange={handleChange}
+							onChange={handleInputChange}
 							size='large'
 							allowClear
 							ref={landingSearchBarRef}
@@ -74,7 +84,7 @@ function App() {
 							activeKey={activeKey}
 							defaultActiveKey={frames('', hasProxy)[0].title}
 							onTabClick={handleTabClick}
-							tabBarExtraContent={links(encodeURIComponent(keyword)).map(({ link, title }) => (
+							tabBarExtraContent={links(encodeURIComponent(searchKey)).map(({ link, title }) => (
 								<Button key={title}>
 									<a
 										title={title}
@@ -89,8 +99,8 @@ function App() {
 								</Button>
 							))}
 						>
-							{frames(encodeURIComponent(keyword), hasProxy)
-								.sort((a, b) => (b?.priority ?? 0) - (a?.priority ?? 0))
+							{frames(encodeURIComponent(searchKey), hasProxy)
+								// .sort((a, b) => (b?.priority ?? 0) - (a?.priority ?? 0))
 								.map(({ title, link }) => (
 									<Tabs.TabPane key={title} tab={title} className='tabpane'>
 										<iframe
@@ -123,9 +133,9 @@ function App() {
 					<div className='search-bar'>
 						<Input.Search
 							placeholder='蓦然回首，那人却在，灯火阑珊处'
-							// value={keyword}
+							value={inputKey}
 							onSearch={handleSearch}
-							// onChange={handleChange}
+							onChange={handleInputChange}
 							size='large'
 							allowClear
 							ref={indexSearchBarRef}
