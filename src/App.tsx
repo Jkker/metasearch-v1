@@ -58,8 +58,10 @@ function App() {
 	useEffect(() => {
 		if (searchKey) {
 			landingSearchBarRef?.current?.focus?.();
+			document.title = `MetaSearch - ${searchKey}`;
 		} else {
 			indexSearchBarRef?.current?.focus?.();
+			document.title = 'MetaSearch - 探索未知';
 		}
 	}, [searchKey]);
 
