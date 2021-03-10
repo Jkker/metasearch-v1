@@ -1,52 +1,64 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Button, Input, Tabs } from 'antd';
 import 'antd/dist/antd.css';
+import mobile from 'ismobilejs';
+import $ from 'jquery';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import request from 'umi-request';
 import './App.css';
 import { frames, links } from './config.js';
 
+// Custom hook to use query string of url
 function useQuery(query: string) {
 	return new URLSearchParams(useLocation().search)?.get(query) ?? '';
+}
+// Custom constructor hook; run once before render
+function useConstructor(callBack = () => {}) {
+	const [hasBeenCalled, setHasBeenCalled] = useState(false);
+	if (hasBeenCalled) return;
+	callBack();
+	setHasBeenCalled(true);
 }
 
 function App() {
 	const [inputKey, setInputKey] = useState(useQuery('q'));
 	const [searchKey, setSearchKey] = useState(useQuery('q'));
+	const [activeEngine, setActiveEngine] = useState(useQuery('engine') ?? '');
+	const [defaultActiveEngine, setDefaultActiveEngine] = useState(frames('', false)[0].title);
+	const [hasProxy, setHasProxy] = useState(false);
 
-	// Active key of tabs
-	const [activeKey, setActiveKey] = useState(useQuery('engine') ?? '');
-	const [defaultActiveKey, setDefaultActiveKey] = useState(frames('', false)[0].title);
-	const handleTabClick = (key: React.SetStateAction<string>, e: any) => {
-		setActiveKey(key);
-	};
+	// Detect if user has proxy & switch tabs accordingly
+	useConstructor(() => {
+		$.ajax({
+			type: 'GET',
+			url: 'https://ipapi.co/jsonp/',
+			async: false,
+			dataType: 'jsonp',
+			success: function (res) {
+				// console.log(res.country);
+				const userHasProxy = res.country === 'CN' ? false : true;
+				setHasProxy(userHasProxy);
+				const key = userHasProxy
+					? frames('', userHasProxy)[0].title
+					: frames('', userHasProxy)[1].title;
+				setDefaultActiveEngine(key);
+			},
+		});
+	});
+
+	// Change url query string according to engine tab change
 	useEffect(() => {
 		history.push(
-			`/?${activeKey ? `engine=${activeKey}&` : ''}${searchKey ? `q=${searchKey}` : ''}`
+			`/?${activeEngine ? `engine=${activeEngine}&` : ''}${searchKey ? `q=${searchKey}` : ''}`
 		);
-	}, [activeKey]);
-
-	// Detect if user has proxy
-	const [hasProxy, setHasProxy] = useState(false);
-	useEffect(() => {
-		(async () => {
-			const req = await request.get('http://ip-api.com/json/');
-			const userHasProxy = req.countryCode === 'CN' ? false : true;
-			setHasProxy(userHasProxy);
-			const key = userHasProxy
-				? frames('', userHasProxy)[0].title
-				: frames('', userHasProxy)[1].title;
-			setDefaultActiveKey(key);
-		})();
-	}, []);
+	}, [activeEngine]);
 
 	//* Core search functionality
 	const history = useHistory();
 	const handleSearch = (key: string) => {
 		setSearchKey(key);
-		history.push(`/?${activeKey ? `engine=${activeKey}&` : ''}${key ? `q=${key}` : ''}`);
+		history.push(`/?${activeEngine ? `engine=${activeEngine}&` : ''}${key ? `q=${key}` : ''}`);
 	};
 	const debounceSearch = useCallback(debounce(handleSearch, 500), []);
 	const handleInputChange = (e: any) => {
@@ -56,7 +68,10 @@ function App() {
 	const handleReset = () => {
 		debounceSearch('');
 		setInputKey('');
-		setActiveKey('');
+		setActiveEngine('');
+	};
+	const handleTabClick = (key: React.SetStateAction<string>, e: any) => {
+		setActiveEngine(key);
 	};
 
 	// Auto focus search bar after refresh
@@ -71,6 +86,12 @@ function App() {
 			document.title = 'MetaSearch - 探索未知';
 		}
 	}, [searchKey]);
+
+	// Detect if user is on mobile platform & parse link accordingly
+	const platform = mobile().any ? 'mobile' : 'desktop';
+	const parseLink = (link: any) => {
+		return link?.[platform] ?? link;
+	};
 
 	return (
 		<>
@@ -90,13 +111,13 @@ function App() {
 					</div>
 					<div className='body-container'>
 						<Tabs
-							activeKey={activeKey ? activeKey : defaultActiveKey}
+							activeKey={activeEngine ? activeEngine : defaultActiveEngine}
 							onTabClick={handleTabClick}
 							tabBarExtraContent={links(encodeURIComponent(searchKey)).map(({ link, title }) => (
 								<Button key={title}>
 									<a
 										title={title}
-										key={link}
+										key={title}
 										href={link}
 										target='_blank'
 										rel='noreferrer'
@@ -114,7 +135,7 @@ function App() {
 										<iframe
 											title={title}
 											className='frame'
-											src={link}
+											src={parseLink(link)}
 											width='100%'
 											height='100%'
 											frameBorder='0'

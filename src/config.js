@@ -61,12 +61,12 @@ export const frames = (keyword, proxy = false) => [
 	// 	link: `https://www.sogou.com/web?query=${keyword}`,
 	// },
 	// {
-	// 	title: '知乎',
-	// 	link: `https://www.google.com/search?igu=1&ei=&pws=0&gl=us&gws_rd=cr&safe=off&source=hp&q=${keyword}+site%3Awww.zhihu.com&oq=${keyword}+site%3Awww.zhihu.com`,
-	// },
 	{
 		title: '有道',
-		link: `https://www.youdao.com/w/${keyword}`,
+		link: {
+			desktop: `https://www.youdao.com/w/${keyword}`,
+			mobile: `http://m.youdao.com/dict?q=${keyword}`,
+		},
 	},
 	{
 		title: '微博',
@@ -96,10 +96,6 @@ export const frames = (keyword, proxy = false) => [
 		title: '语雀',
 		link: `https://www.yuque.com/search?&q=${keyword}`,
 	},
-	// {
-	// 	title: 'Doge',
-	// 	link: `https://www.dogedoge.com/results?q=${keyword}`,
-	// },
 	{
 		title: '百度指数',
 		link: `https://index.baidu.com/v2/main/index.html#/trend/${keyword}?words=${keyword}`,
