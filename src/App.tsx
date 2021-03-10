@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Button, Input, Tabs } from 'antd';
+import { LinkOutlined } from '@ant-design/icons';
+import { Button, Divider, Dropdown, Input, Menu, Tabs } from 'antd';
 import 'antd/dist/antd.css';
 import mobile from 'ismobilejs';
-import $ from 'jquery';
+import { ajax } from 'jquery';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -30,7 +31,7 @@ function App() {
 
 	// Detect if user has proxy & switch tabs accordingly
 	useConstructor(() => {
-		$.ajax({
+		ajax({
 			type: 'GET',
 			url: 'https://ipapi.co/jsonp/',
 			async: false,
@@ -57,6 +58,10 @@ function App() {
 	//* Core search functionality
 	const history = useHistory();
 	const handleSearch = (key: string) => {
+		if (key === searchKey) {
+			history.go(0);
+			return;
+		}
 		setSearchKey(key);
 		history.push(`/?${activeEngine ? `engine=${activeEngine}&` : ''}${key ? `q=${key}` : ''}`);
 	};
@@ -88,10 +93,47 @@ function App() {
 	}, [searchKey]);
 
 	// Detect if user is on mobile platform & parse link accordingly
-	const platform = mobile().any ? 'mobile' : 'desktop';
+	const isMobile = mobile().any;
+	const platform = isMobile ? 'mobile' : 'desktop';
 	const parseLink = (link: any) => {
 		return link?.[platform] ?? link;
 	};
+
+	const menu = isMobile ? (
+		<Menu>
+			{links(encodeURIComponent(searchKey)).map(({ link, title }) => (
+				<Menu.Item key={title}>
+					<a
+						title={title}
+						key={title}
+						href={link}
+						target='_blank'
+						rel='noreferrer'
+						className='links'
+					>
+						{title}
+					</a>
+				</Menu.Item>
+			))}
+		</Menu>
+	) : (
+		<div className='links-container'>
+			{links(encodeURIComponent(searchKey)).map(({ link, title }) => (
+				<Button key={title} className='dropdown-button'>
+					<a
+						title={title}
+						key={title}
+						href={link}
+						target='_blank'
+						rel='noreferrer'
+						className='links'
+					>
+						{title} <LinkOutlined />
+					</a>
+				</Button>
+			))}
+		</div>
+	);
 
 	return (
 		<>
@@ -100,6 +142,7 @@ function App() {
 					<div className='head-container'>
 						<img className='logo-left' src='favicon.png' alt='' onClick={handleReset} />
 						<Input.Search
+							className='search-bar-landing'
 							placeholder='蓦然回首，那人却在，灯火阑珊处'
 							value={inputKey}
 							onSearch={handleSearch}
@@ -107,26 +150,25 @@ function App() {
 							size='large'
 							allowClear
 							ref={landingSearchBarRef}
+							// enterButton
 						/>
+						<div className='links-container'>
+							<Divider type='vertical' />
+							{isMobile ? (
+								<Dropdown overlay={menu}>
+									<Button className='dropdown-button' type='primary' ghost>
+										Links <LinkOutlined />
+									</Button>
+								</Dropdown>
+							) : (
+								menu
+							)}
+						</div>
 					</div>
 					<div className='body-container'>
 						<Tabs
 							activeKey={activeEngine ? activeEngine : defaultActiveEngine}
 							onTabClick={handleTabClick}
-							tabBarExtraContent={links(encodeURIComponent(searchKey)).map(({ link, title }) => (
-								<Button key={title}>
-									<a
-										title={title}
-										key={title}
-										href={link}
-										target='_blank'
-										rel='noreferrer'
-										className='links'
-									>
-										{title}
-									</a>
-								</Button>
-							))}
 						>
 							{frames(encodeURIComponent(searchKey), hasProxy)
 								// .sort((a, b) => (b?.priority ?? 0) - (a?.priority ?? 0))

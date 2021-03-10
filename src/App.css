@@ -9,16 +9,36 @@ body {
 	min-width: 100vw;
 }
 .head-container {
+	margin-top: 15px;
 	background: #fff;
 	display: flex;
 	justify-content: space-between;
+	flex-wrap: nowrap;
+	align-items: center;
 	text-align: center;
 	flex-shrink: 0;
 	width: 100vw;
+	height: 40px;
 }
 .logo-left {
-	height: 34px;
 	margin: 3px 10px;
+	height: 36px;
+}
+.ant-divider-vertical {
+	height: 40px;
+}
+.dropdown-button {
+	height: 40px;
+	margin-left: 5px;
+	padding: 3px 11px;
+}
+.dropdown-button:first-of-type {
+	margin-left: 0;
+}
+.links-container {
+	display: flex;
+	flex-wrap: nowrap;
+	margin-right: 10px;
 }
 .ant-tabs-nav {
 	margin: 0 10px !important;
