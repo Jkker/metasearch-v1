@@ -80,10 +80,10 @@ function App() {
 	useEffect(() => {
 		if (searchKey) {
 			landingSearchBarRef?.current?.focus?.();
-			document.title = `MetaSearch - ${searchKey}`;
+			document.title = `Metasearch - ${searchKey}`;
 		} else {
 			indexSearchBarRef?.current?.focus?.();
-			document.title = 'MetaSearch - 探索未知';
+			document.title = 'Metasearch - 探索未知';
 		}
 	}, [searchKey]);
 
@@ -148,15 +148,9 @@ function App() {
 					</div>
 				</div>
 			) : (
-				<div
-					className='index-page'
-					style={{
-						backgroundImage: 'url(https://i.loli.net/2021/03/09/86O5gQlxUputVS2.jpg)',
-					}}
-				>
+				<div className='index-page'>
 					<div className='index-head' onClick={handleReset}>
-						{/* <img className='logo-center' src='favicon.png' alt='' /> */}
-						<span className='index-title'>🚀 Meta Search</span>
+						<img className='logo-center' src='logo.png' alt='' />
 					</div>
 					<div className='search-bar'>
 						<Input.Search
