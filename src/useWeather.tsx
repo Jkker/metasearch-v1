@@ -11,11 +11,11 @@ WIDGET = {
   CONFIG: {
     "modules": "01234",
     "background": 5,
-    "tmpColor": "4A4A4A",
-    "tmpSize": 16,
-    "cityColor": "4A4A4A",
-    "citySize": 16,
-    "aqiSize": 16,
+    "tmpColor": "FFF",
+    "tmpSize": 14,
+    "cityColor": "FFF",
+    "citySize": 14,
+    "aqiSize": 14,
     "weatherIconSize": 24,
     "alertIconSize": 18,
     "padding": "10px 10px 10px 10px",
@@ -24,8 +24,8 @@ WIDGET = {
     "fixed": "true",
     "vertical": "middle",
     "horizontal": "center",
-    "left": "15",
-    "top": "15",
+    "left": "12",
+    "top": "12",
     "key": "ydv69AmsJg"
   }
 }
