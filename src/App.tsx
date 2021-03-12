@@ -6,15 +6,17 @@ import mobile from 'ismobilejs';
 import { ajax } from 'jquery';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { Link, useHistory, useLocation } from 'react-router-dom';
 import './App.css';
 import { frames, links } from './config.js';
 import useWeather from './useWeather';
+
 // TODO: make blog accessible via scrolling down the bottom of the page
 
 // Custom hook to use query string of url
 function useQuery(query: string) {
-	return new URLSearchParams(useLocation().search)?.get(query) ?? '';
+	const queryString = require('query-string');
+	return queryString.parse(useLocation().search)?.[query] ?? '';
 }
 // Custom constructor hook; run once before render
 function useConstructor(callBack = () => {}) {
@@ -25,9 +27,11 @@ function useConstructor(callBack = () => {}) {
 }
 
 function App() {
-	const [inputKey, setInputKey] = useState(useQuery('q'));
-	const [searchKey, setSearchKey] = useState(useQuery('q'));
-	const [activeEngine, setActiveEngine] = useState(useQuery('engine') ?? '');
+	const q = useQuery('q');
+	const engine = useQuery('engine');
+	const [inputKey, setInputKey] = useState(q);
+	const [searchKey, setSearchKey] = useState(q);
+	const [activeEngine, setActiveEngine] = useState(engine);
 	const [defaultActiveEngine, setDefaultActiveEngine] = useState(frames('', false)[0].title);
 	const [hasProxy, setHasProxy] = useState(false);
 
@@ -50,36 +54,49 @@ function App() {
 		});
 	});
 
-	// Change url query string according to engine tab change
-	useEffect(() => {
-		history.push(
-			`/?${activeEngine ? `engine=${activeEngine}&` : ''}${searchKey ? `q=${searchKey}` : ''}`
-		);
-	}, [activeEngine]);
-
 	//* Core search functionality
 	const history = useHistory();
 	const handleSearch = (key: string) => {
 		if (key === searchKey) {
+			// console.log('search key unchanged; refresh');
 			history.go(0);
 			return;
+		} else {
+			history.push(`/?${activeEngine ? `engine=${activeEngine}&` : ''}${key ? `q=${key}` : ''}`);
+			setSearchKey(key);
+			// console.log('handleSearch: ', activeEngine, key);
+			// console.log(history);
 		}
-		setSearchKey(key);
-		history.push(`/?${activeEngine ? `engine=${activeEngine}&` : ''}${key ? `q=${key}` : ''}`);
 	};
-	const debounceSearch = useCallback(debounce(handleSearch, 500), []);
+	const debounceSearch = useCallback(debounce(handleSearch, 500), [handleSearch]);
 	const handleInputChange = (e: any) => {
+		// console.log('input changed');
 		debounceSearch(e.target.value);
 		setInputKey(e.target.value);
 	};
 	const handleReset = () => {
-		debounceSearch('');
-		setInputKey('');
 		setActiveEngine('');
+		setInputKey('');
+		setSearchKey('');
+		history.push('/');
 	};
-	const handleTabClick = (key: React.SetStateAction<string>, e: any) => {
-		setActiveEngine(key);
+	const handleTabClick = (tabKey: React.SetStateAction<string>, e: any) => {
+		// setActiveEngine(key);
+		if (tabKey === activeEngine) {
+			// console.log('tab key unchanged; refresh');
+			history.go(0);
+			return;
+		}
+		setActiveEngine(tabKey);
+		history.push(`/?${tabKey ? `engine=${tabKey}&` : ''}${searchKey ? `q=${searchKey}` : ''}`);
+		// console.log('Tab change: ', activeEngine, searchKey);
 	};
+
+	useEffect(() => {
+		setSearchKey(q);
+		setInputKey(q);
+		setActiveEngine(engine);
+	}, [q, engine]);
 
 	// Auto focus search bar after refresh
 	const indexSearchBarRef = useRef<any>(null);
@@ -87,12 +104,12 @@ function App() {
 	useEffect(() => {
 		if (searchKey) {
 			landingSearchBarRef?.current?.focus?.();
-			document.title = `Metasearch - ${searchKey}`;
+			document.title = `${searchKey} - ${activeEngine || defaultActiveEngine}`;
 		} else {
 			indexSearchBarRef?.current?.focus?.();
 			document.title = 'Metasearch - 探索未知';
 		}
-	}, [searchKey]);
+	}, [searchKey, activeEngine]);
 
 	// Detect if user is on mobile platform & parse link accordingly
 	const isMobile = mobile().any;
@@ -145,7 +162,9 @@ function App() {
 			{searchKey ? (
 				<div className='app-container'>
 					<div className='head-container'>
-						<img className='logo-left' src='favicon.png' alt='' onClick={handleReset} />
+						<Link to='/'>
+							<img className='logo-left' src='favicon.png' alt='Logo' />
+						</Link>
 						<Input.Search
 							className='search-bar-landing'
 							placeholder='蓦然回首，那人却在，灯火阑珊处'
@@ -155,7 +174,6 @@ function App() {
 							size='large'
 							allowClear
 							ref={landingSearchBarRef}
-							// enterButton
 						/>
 						<div className='links-container'>
 							<Divider type='vertical' />
