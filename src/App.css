@@ -93,7 +93,32 @@ body {
 	width: 584px;
 	max-width: 80vw;
 	margin-bottom: 40px;
-	opacity: 0.9;
 	border-radius: 20px;
-	backdrop-filter: blur(30px);
+}
+.search-bar * {
+	background: none;
+	color: white;
+}
+.ant-input-affix-wrapper,
+.ant-btn {
+	background: rgba(255, 255, 255, 0.35);
+	backdrop-filter: blur(3px);
+}
+.search-bar ::placeholder {
+	color: rgba(255, 255, 255, 0.75);
+}
+.search-bar .ant-btn {
+	background: #eee;
+}
+.search-bar svg {
+	fill: gray;
+}
+#weather > div {
+	display: block;
+	z-index: 3;
+	position: absolute;
+	top: 0;
+	left: 0;
+	background: rgba(255, 255, 255, 0.45);
+	backdrop-filter: blur(3px);
 }

@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import './App.css';
 import { frames, links } from './config.js';
-
+import useWeather from './useWeather';
 // TODO: make blog accessible via scrolling down the bottom of the page
 
 // Custom hook to use query string of url
@@ -137,8 +137,11 @@ function App() {
 		</div>
 	);
 
+	useWeather('#weather');
+
 	return (
 		<>
+			<div id='weather' style={{ display: searchKey ? 'none' : 'block' }}></div>
 			{searchKey ? (
 				<div className='app-container'>
 					<div className='head-container'>
