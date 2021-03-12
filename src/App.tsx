@@ -10,6 +10,8 @@ import { useHistory, useLocation } from 'react-router-dom';
 import './App.css';
 import { frames, links } from './config.js';
 
+// TODO: make blog accessible via scrolling down the bottom of the page
+
 // Custom hook to use query string of url
 function useQuery(query: string) {
 	return new URLSearchParams(useLocation().search)?.get(query) ?? '';

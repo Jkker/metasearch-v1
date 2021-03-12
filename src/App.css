@@ -76,16 +76,24 @@ body {
 	margin-bottom: 16px;
 	width: 584px;
 	max-width: 80vw;
-	opacity: 90%;
+	opacity: 0.9;
 }
 .logo-center {
-	height: 12vh;
+	height: 13vh;
+	/* min-height: 70px; */
+}
+@media screen and (max-width: 767px) {
+	.logo-center {
+		width: 600px;
+		max-width: 80vw;
+		height: auto;
+	}
 }
 .search-bar {
 	width: 584px;
 	max-width: 80vw;
 	margin-bottom: 40px;
-	opacity: 90%;
+	opacity: 0.9;
 	border-radius: 20px;
 	backdrop-filter: blur(30px);
 }
