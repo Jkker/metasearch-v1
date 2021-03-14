@@ -13,7 +13,7 @@ import useQuery from './useQuery';
 import useWeather from './useWeather';
 
 // TODO: make blog accessible via scrolling down the bottom of the page
-const DEBUG = true;
+const DEBUG = false;
 // Custom constructor hook; run once before render
 function useConstructor(callBack = () => {}) {
 	const [hasBeenCalled, setHasBeenCalled] = useState(false);
@@ -53,6 +53,7 @@ function App() {
 
 	const handleSetSearch = (key: string) => {
 		if (key === searchKey) {
+			history.go(0);
 			return;
 		} else {
 			setSearchKey(key);
@@ -82,7 +83,9 @@ function App() {
 	// Handle search query change
 	useEffect(() => {
 		setInputKey(q ?? '');
-		handleSetSearch(q);
+		if (q !== searchKey) {
+			handleSetSearch(q);
+		}
 	}, [q]);
 
 	// When logo or clear button is clicked
@@ -211,7 +214,8 @@ function App() {
 												width='100%'
 												height='100%'
 												frameBorder='0'
-												loading='eager'
+												loading='lazy'
+												sandbox='allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'
 												referrerPolicy='no-referrer'
 											/>
 										)}
