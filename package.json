@@ -9,6 +9,7 @@
 		"jquery": "^3.6.0",
 		"lodash": "^4.17.21",
 		"postscribe": "^2.0.8",
+		"query-string": "^6.14.1",
 		"react": "^17.0.1",
 		"react-dom": "^17.0.1",
 		"react-router-dom": "^5.2.0",
@@ -24,6 +25,7 @@
 		"@types/jquery": "^3.5.5",
 		"@types/lodash": "^4.14.168",
 		"@types/node": "^12.0.0",
+		"@types/query-string": "^6.3.0",
 		"@types/react": "^17.0.0",
 		"@types/react-dom": "^17.0.0",
 		"@types/react-router-dom": "^5.1.7"

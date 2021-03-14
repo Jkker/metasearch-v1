@@ -6,16 +6,14 @@ import mobile from 'ismobilejs';
 import { ajax } from 'jquery';
 import { debounce } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import './App.css';
 import { frames, links } from './config.js';
+import useQuery from './useQuery';
 import useWeather from './useWeather';
-// TODO: make blog accessible via scrolling down the bottom of the page
 
-// Custom hook to use query string of url
-function useQuery(query: string) {
-	return new URLSearchParams(useLocation().search)?.get(query) ?? '';
-}
+// TODO: make blog accessible via scrolling down the bottom of the page
+const DEBUG = false;
 // Custom constructor hook; run once before render
 function useConstructor(callBack = () => {}) {
 	const [hasBeenCalled, setHasBeenCalled] = useState(false);
@@ -25,11 +23,12 @@ function useConstructor(callBack = () => {}) {
 }
 
 function App() {
-	const [inputKey, setInputKey] = useState(useQuery('q'));
-	const [searchKey, setSearchKey] = useState(useQuery('q'));
-	const [activeEngine, setActiveEngine] = useState(useQuery('engine') ?? '');
-	const [defaultActiveEngine, setDefaultActiveEngine] = useState(frames('', false)[0].title);
+	const [{ q, engine }, updateQuery] = useQuery();
+	const [inputKey, setInputKey] = useState(q);
+	const [searchKey, setSearchKey] = useState(q);
+	const [defaultEngine, setDefaultEngine] = useState(frames('', false)[0].title);
 	const [hasProxy, setHasProxy] = useState(false);
+	// const [tabActiveKey, setTabActiveKey] = useState(engine);
 
 	// Detect if user has proxy & switch tabs accordingly
 	useConstructor(() => {
@@ -39,46 +38,69 @@ function App() {
 			async: false,
 			dataType: 'jsonp',
 			success: function (res) {
-				// console.log(res.country);
 				const userHasProxy = res.country === 'CN' ? false : true;
 				setHasProxy(userHasProxy);
 				const key = userHasProxy
 					? frames('', userHasProxy)[0].title
 					: frames('', userHasProxy)[1].title;
-				setDefaultActiveEngine(key);
+				setDefaultEngine(key);
 			},
 		});
 	});
 
-	// Change url query string according to engine tab change
-	useEffect(() => {
-		history.push(
-			`/?${activeEngine ? `engine=${activeEngine}&` : ''}${searchKey ? `q=${searchKey}` : ''}`
-		);
-	}, [activeEngine]);
-
 	//* Core search functionality
 	const history = useHistory();
-	const handleSearch = (key: string) => {
+
+	const handleSetSearch = (key: string) => {
 		if (key === searchKey) {
 			history.go(0);
 			return;
+		} else {
+			setSearchKey(key);
 		}
-		setSearchKey(key);
-		history.push(`/?${activeEngine ? `engine=${activeEngine}&` : ''}${key ? `q=${key}` : ''}`);
 	};
-	const debounceSearch = useCallback(debounce(handleSearch, 500), []);
+	const debounceSetSearch = useCallback(debounce(handleSetSearch, 1000), [searchKey]);
+	const handleSetSearchQuery = (key: string) => {
+		if (key === q) {
+			return;
+		} else {
+			updateQuery({ q: key });
+		}
+	};
+	const debounceSetSearchQuery = useCallback(debounce(handleSetSearchQuery, 1000), [engine]);
+
+	// Handle input change
 	const handleInputChange = (e: any) => {
-		debounceSearch(e.target.value);
-		setInputKey(e.target.value);
+		const key = e.target.value;
+		if (key === inputKey) {
+			return;
+		} else {
+			debounceSetSearch(key);
+			debounceSetSearchQuery(key);
+			setInputKey(key);
+		}
 	};
+	// Handle search query change
+	useEffect(() => {
+		setInputKey(q ?? '');
+		if (q !== searchKey) {
+			handleSetSearch(q);
+		}
+	}, [q]);
+
+	// When logo or clear button is clicked
 	const handleReset = () => {
-		debounceSearch('');
 		setInputKey('');
-		setActiveEngine('');
+		handleSetSearch('');
+		history.push('/');
 	};
-	const handleTabClick = (key: React.SetStateAction<string>, e: any) => {
-		setActiveEngine(key);
+
+	const handleTabClick = (tabKey: React.SetStateAction<string>, e: any) => {
+		if (tabKey === engine) {
+			history.go(0);
+			return;
+		}
+		updateQuery({ engine: tabKey });
 	};
 
 	// Auto focus search bar after refresh
@@ -87,12 +109,12 @@ function App() {
 	useEffect(() => {
 		if (searchKey) {
 			landingSearchBarRef?.current?.focus?.();
-			document.title = `Metasearch - ${searchKey}`;
+			document.title = `${searchKey} - ${engine || defaultEngine}`;
 		} else {
 			indexSearchBarRef?.current?.focus?.();
 			document.title = 'Metasearch - 探索未知';
 		}
-	}, [searchKey]);
+	}, [searchKey, engine]);
 
 	// Detect if user is on mobile platform & parse link accordingly
 	const isMobile = mobile().any;
@@ -145,17 +167,18 @@ function App() {
 			{searchKey ? (
 				<div className='app-container'>
 					<div className='head-container'>
-						<img className='logo-left' src='favicon.png' alt='' onClick={handleReset} />
+						<div onClick={handleReset}>
+							<img className='logo-left' src='favicon.png' alt='Logo' />
+						</div>
 						<Input.Search
 							className='search-bar-landing'
 							placeholder='蓦然回首，那人却在，灯火阑珊处'
 							value={inputKey}
-							onSearch={handleSearch}
+							onSearch={handleSetSearch}
 							onChange={handleInputChange}
 							size='large'
 							allowClear
 							ref={landingSearchBarRef}
-							// enterButton
 						/>
 						<div className='links-container'>
 							<Divider type='vertical' />
@@ -171,24 +194,31 @@ function App() {
 						</div>
 					</div>
 					<div className='body-container'>
-						<Tabs
-							activeKey={activeEngine ? activeEngine : defaultActiveEngine}
-							onTabClick={handleTabClick}
-						>
+						<Tabs activeKey={engine ? engine : defaultEngine} onTabClick={handleTabClick}>
 							{frames(encodeURIComponent(searchKey), hasProxy)
 								// .sort((a, b) => (b?.priority ?? 0) - (a?.priority ?? 0))
 								.map(({ title, link }) => (
 									<Tabs.TabPane key={title} tab={title} className='tabpane'>
-										<iframe
-											title={title}
-											className='frame'
-											src={parseLink(link)}
-											width='100%'
-											height='100%'
-											frameBorder='0'
-											loading='eager'
-											referrerPolicy='no-referrer'
-										/>
+										{DEBUG ? (
+											<dl>
+												<dt>Search Key</dt>
+												<dd>{searchKey}</dd>
+												<dt>Engine</dt>
+												<dd>{engine}</dd>
+											</dl>
+										) : (
+											<iframe
+												title={title}
+												className='frame'
+												src={parseLink(link)}
+												width='100%'
+												height='100%'
+												frameBorder='0'
+												loading='lazy'
+												sandbox='allow-same-origin allow-scripts allow-popups allow-forms allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'
+												referrerPolicy='no-referrer'
+											/>
+										)}
 									</Tabs.TabPane>
 								))}
 						</Tabs>
@@ -203,7 +233,7 @@ function App() {
 						<Input.Search
 							placeholder='蓦然回首，那人却在，灯火阑珊处'
 							value={inputKey}
-							onSearch={handleSearch}
+							onSearch={handleSetSearch}
 							onChange={handleInputChange}
 							size='large'
 							allowClear
