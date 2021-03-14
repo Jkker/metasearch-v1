@@ -7,6 +7,22 @@ export const links = (keyword) => [
 		title: 'Github',
 		link: `https://github.com/search?q=${keyword}`,
 	},
+	{
+		title: 'YouTube',
+		link: `https://www.youtube.com/results?search_query=${keyword}`,
+	},
+	{
+		title: 'Magi',
+		link: `https://magi.com/search?q=${keyword}`,
+	},
+	{
+		title: 'MDN',
+		link: `https://developer.mozilla.org/en-US/search?q=${keyword}`,
+	},
+	{
+		title: 'KAT',
+		link: `https://kat.rip/usearch/${keyword}/`,
+	},
 	// {
 	// 	title: '网易云音乐',
 	// 	link: `https://music.163.com/#/search/m/?s=${keyword}`,
@@ -86,16 +102,13 @@ export const frames = (keyword, proxy = false) => [
 	},
 	{
 		title: '京东',
-		link: `https://search.jd.com/Search?keyword=${keyword}&enc=utf-8&spm=2.1.`,
+		link: `https://search.jd.com/Search?keyword=${keyword}&enc=utf-8&spm=2.1`,
 	},
-	{
-		title: 'Magi',
-		link: `https://magi.com/search?q=${keyword}`,
-	},
-	{
-		title: '语雀',
-		link: `https://www.yuque.com/search?&q=${keyword}`,
-	},
+
+	// {
+	// 	title: '语雀',
+	// 	link: `https://www.yuque.com/search?&q=${keyword}`,
+	// },
 	{
 		title: '百度指数',
 		link: `https://index.baidu.com/v2/main/index.html#/trend/${keyword}?words=${keyword}`,
