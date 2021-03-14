@@ -44,7 +44,7 @@ export const links = (keyword) => [
 export const frames = (keyword, proxy = false) => [
 	{
 		title: 'Google',
-		link: `https://www.google.com/search?igu=1&pws=0&gl=us&gws_rd=cr&source=hp&q=${keyword}&oq=${keyword}`,
+		link: `https://www.google.com/search?igu=1&pws=0&gl=us&gws_rd=cr&source=hp&newwindow=1&q=${keyword}&oq=${keyword}`,
 		priority: 10 + (proxy ? 1 : -1),
 	},
 	{
