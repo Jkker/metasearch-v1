@@ -2,6 +2,9 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Side Note
+The hardest part of this project was to get the query string, the search key of iframes, and the input value of the search bar synced up.
+
 ## Available Scripts
 
 In the project directory, you can run:
